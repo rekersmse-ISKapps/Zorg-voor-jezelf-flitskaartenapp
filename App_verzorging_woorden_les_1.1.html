@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Flashcards Verzorging - Les 1.1</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Nunito', sans-serif;
+            background: linear-gradient(135deg, #e0f2fe 0%, #f0f9ff 100%);
+        }
+        h1, h2, h3, .font-heading {
+            font-family: 'Fredoka', sans-serif;
+        }
+        
+        /* 3D Card Flip Effect */
+        .perspective-1000 {
+            perspective: 1000px;
+        }
+        .transform-style-3d {
+            transform-style: preserve-3d;
+        }
+        .backface-hidden {
+            backface-visibility: hidden;
+            -webkit-backface-visibility: hidden;
+        }
+        .rotate-y-180 {
+            transform: rotateY(180deg);
+        }
+        .card-inner {
+            transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+    </style>
+</head>
+<body class="min-h-screen text-slate-800 flex flex-col justify-between">
+
+    <!-- Header -->
+    <header class="bg-white/80 backdrop-blur-md border-b border-sky-100 sticky top-0 z-50">
+        <div class="max-w-5xl mx-auto px-4 py-4 flex flex-wrap justify-between items-center gap-4">
+            <div class="flex items-center space-x-3">
+                <div class="w-10 h-10 rounded-2xl bg-teal-500 text-white flex items-center justify-center text-xl shadow-lg shadow-teal-500/30">
+                    <i class="fa-solid fa-heart-pulse"></i>
+                </div>
+                <div>
+                    <h1 class="text-2xl font-bold text-slate-900 leading-none">Flashcards Verzorging</h1>
+                    <span class="text-xs font-semibold text-teal-600 tracking-wide uppercase">Les 1.1 - Het Lichaam</span>
+                </div>
+            </div>
+
+            <!-- Navigation Tabs -->
+            <nav class="flex bg-slate-100 p-1.5 rounded-2xl space-x-1">
+                <button id="tab-cards" onclick="switchTab('cards')" class="px-4 py-2 rounded-xl text-sm font-bold transition-all bg-white text-teal-600 shadow-sm">
+                    <i class="fa-solid fa-layer-group mr-1.5"></i> Flitskaarten
+                </button>
+                <button id="tab-quiz" onclick="switchTab('quiz')" class="px-4 py-2 rounded-xl text-sm font-bold text-slate-600 hover:text-slate-900 transition-all">
+                    <i class="fa-solid fa-circle-question mr-1.5"></i> Oefenquiz
+                </button>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Main Content Area -->
+    <main class="max-w-4xl mx-auto px-4 py-8 flex-grow w-full">
+
+        <!-- TAB 1: FLASHCARDS -->
+        <section id="sec-cards" class="space-y-6">
+            <!-- Progress Bar & Score -->
+            <div class="bg-white p-5 rounded-3xl shadow-sm border border-slate-100 flex flex-wrap justify-between items-center gap-4">
+                <div class="flex-1 min-w-[200px]">
+                    <div class="flex justify-between text-sm font-bold mb-2">
+                        <span class="text-slate-500">Voortgang geleerd</span>
+                        <span id="progress-text" class="text-teal-600">0 / 5</span>
+                    </div>
+                    <div class="w-full bg-slate-100 h-3 rounded-full overflow-hidden">
+                        <div id="progress-bar" class="bg-teal-500 h-full w-0 transition-all duration-300 rounded-full"></div>
+                    </div>
+                </div>
+                <div class="flex items-center gap-3">
+                    <button onclick="shuffleCards()" class="px-3.5 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl font-bold text-sm transition-all flex items-center gap-2">
+                        <i class="fa-solid fa-shuffle"></i> Husselen
+                    </button>
+                    <button onclick="resetProgress()" class="px-3.5 py-2 bg-rose-50 hover:bg-rose-100 text-rose-600 rounded-xl font-bold text-sm transition-all flex items-center gap-2">
+                        <i class="fa-solid fa-rotate-left"></i> Reset
+                    </button>
+                </div>
+            </div>
+
+            <!-- Card Container -->
+            <div class="perspective-1000 w-full max-w-lg mx-auto h-80 cursor-pointer group" onclick="flipCard()">
+                <div id="flashcard-inner" class="card-inner relative w-full h-full transform-style-3d shadow-xl rounded-3xl border border-slate-100 bg-white">
+                    
+                    <!-- Front Side (Word) -->
+                    <div class="absolute inset-0 backface-hidden rounded-3xl p-8 flex flex-col justify-between items-center text-center bg-white border-2 border-teal-500/20">
+                        <div class="w-full flex justify-between items-center text-xs font-bold text-slate-400">
+                            <span>BEGRIP</span>
+                            <span id="card-counter">Kaart 1 van 5</span>
+                        </div>
+                        <div class="my-auto">
+                            <h2 id="card-term" class="text-4xl font-extrabold text-slate-800 mb-2">lichaam</h2>
+                            <p class="text-xs font-semibold text-slate-400">Klik op de kaart om de definitie te zien</p>
+                        </div>
+                        <div class="text-slate-400 text-sm flex items-center gap-2">
+                            <i class="fa-solid fa-arrows-rotate animate-pulse"></i> Klik om te draaien
+                        </div>
+                    </div>
+
+                    <!-- Back Side (Definition) -->
+                    <div class="absolute inset-0 backface-hidden rotate-y-180 rounded-3xl p-8 flex flex-col justify-between items-center text-center bg-gradient-to-br from-teal-500 to-emerald-600 text-white">
+                        <div class="w-full flex justify-between items-center text-xs font-bold text-teal-100">
+                            <span>DEFINITIE</span>
+                            <i class="fa-solid fa-lightbulb text-lg"></i>
+                        </div>
+                        <div class="my-auto">
+                            <p id="card-definition" class="text-2xl font-bold leading-relaxed">Je botten, spieren en organen.</p>
+                        </div>
+                        <div class="text-teal-100 text-sm">
+                            <i class="fa-solid fa-check-circle mr-1"></i> Onthouden?
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Controls -->
+            <div class="flex justify-center items-center gap-4 max-w-lg mx-auto pt-2">
+                <button onclick="prevCard()" class="w-14 h-14 bg-white hover:bg-slate-50 text-slate-700 rounded-2xl shadow-md flex items-center justify-center text-xl font-bold transition-all border border-slate-100 hover:scale-105 active:scale-95">
+                    <i class="fa-solid fa-chevron-left"></i>
+                </button>
+
+                <button id="btn-master" onclick="toggleMastered()" class="flex-1 py-4 bg-teal-500 hover:bg-teal-600 text-white rounded-2xl shadow-lg shadow-teal-500/30 font-bold text-lg transition-all flex items-center justify-center gap-2 hover:scale-[1.02] active:scale-95">
+                    <i class="fa-solid fa-circle-check"></i> <span id="master-btn-text">Markeer als Geleerd</span>
+                </button>
+
+                <button onclick="nextCard()" class="w-14 h-14 bg-white hover:bg-slate-50 text-slate-700 rounded-2xl shadow-md flex items-center justify-center text-xl font-bold transition-all border border-slate-100 hover:scale-105 active:scale-95">
+                    <i class="fa-solid fa-chevron-right"></i>
+                </button>
+            </div>
+        </section>
+
+
+        <!-- TAB 2: QUIZ -->
+        <section id="sec-quiz" class="hidden space-y-6 max-w-2xl mx-auto">
+            <div class="bg-white p-8 rounded-3xl shadow-xl border border-slate-100 space-y-6">
+                <div class="flex justify-between items-center border-b border-slate-100 pb-4">
+                    <h2 class="text-2xl font-bold text-slate-800">Test je kennis</h2>
+                    <span id="quiz-score" class="px-3 py-1 bg-teal-100 text-teal-700 font-bold rounded-full text-sm">Score: 0 / 0</span>
+                </div>
+
+                <div id="quiz-question-box" class="space-y-4">
+                    <p class="text-xs font-bold text-teal-600 uppercase tracking-wider">Wat is de juiste betekenis van:</p>
+                    <h3 id="quiz-term" class="text-3xl font-extrabold text-slate-900">...</h3>
+
+                    <!-- Options Grid -->
+                    <div id="quiz-options" class="grid grid-cols-1 gap-3 pt-2">
+                        <!-- Options injected dynamically -->
+                    </div>
+                </div>
+
+                <!-- Feedback & Next Button -->
+                <div id="quiz-feedback" class="hidden p-4 rounded-2xl text-center font-bold"></div>
+                
+                <button id="btn-next-quiz" onclick="generateQuizQuestion()" class="hidden w-full py-3.5 bg-slate-900 hover:bg-slate-800 text-white font-bold rounded-xl transition-all">
+                    Volgende Vraag <i class="fa-solid fa-arrow-right ml-2"></i>
+                </button>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-white/60 border-t border-slate-200/60 py-4 text-center text-xs text-slate-400">
+        <p>Flashcards Verzorging • Les 1.1 Omgeving & Gezondheid</p>
+    </footer>
+
+    <!-- App Logic -->
+    <script>
+        // Initial dataset from image
+        const defaultWords = [
+            { id: 1, term: "lichaam", definition: "Je botten, spieren en organen.", mastered: false },
+            { id: 2, term: "binnenkant", definition: "Wat er in zit als je iets open maakt.", mastered: false },
+            { id: 3, term: "groeiproces", definition: "Groter worden.", mastered: false },
+            { id: 4, term: "zaadcel", definition: "Cel van de man.", mastered: false },
+            { id: 5, term: "eicel", definition: "Cel van de vrouw.", mastered: false }
+        ];
+
+        let words = JSON.parse(localStorage.getItem('verzorging_words')) || defaultWords;
+        let currentIndex = 0;
+        let isFlipped = false;
+        let quizScore = 0;
+        let quizTotal = 0;
+
+        // Save words to localStorage
+        function saveWords() {
+            localStorage.setItem('verzorging_words', JSON.stringify(words));
+        }
+
+        // Tab Switching
+        function switchTab(tab) {
+            document.querySelectorAll('main > section').forEach(sec => sec.classList.add('hidden'));
+            document.querySelectorAll('nav > button').forEach(btn => {
+                btn.classList.remove('bg-white', 'text-teal-600', 'shadow-sm');
+                btn.classList.add('text-slate-600');
+            });
+
+            document.getElementById(`sec-${tab}`).classList.remove('hidden');
+            const activeBtn = document.getElementById(`tab-${tab}`);
+            activeBtn.classList.add('bg-white', 'text-teal-600', 'shadow-sm');
+            activeBtn.classList.remove('text-slate-600');
+
+            if (tab === 'quiz') {
+                generateQuizQuestion();
+            }
+        }
+
+        // Flashcards Logic
+        function renderCard() {
+            if (words.length === 0) {
+                document.getElementById('card-term').innerText = "Geen woorden";
+                document.getElementById('card-definition').innerText = "";
+                document.getElementById('card-counter').innerText = "0 / 0";
+                return;
+            }
+
+            const current = words[currentIndex];
+            document.getElementById('card-term').innerText = current.term;
+            document.getElementById('card-definition').innerText = current.definition;
+            document.getElementById('card-counter').innerText = `Kaart ${currentIndex + 1} van ${words.length}`;
+
+            // Reset Flip State
+            isFlipped = false;
+            document.getElementById('flashcard-inner').classList.remove('rotate-y-180');
+
+            // Update Master Button state
+            const btnMaster = document.getElementById('btn-master');
+            const btnText = document.getElementById('master-btn-text');
+            if (current.mastered) {
+                btnMaster.classList.remove('bg-teal-500', 'hover:bg-teal-600', 'shadow-teal-500/30');
+                btnMaster.classList.add('bg-emerald-600', 'hover:bg-emerald-700', 'shadow-emerald-600/30');
+                btnText.innerText = "Geleerd ✓";
+            } else {
+                btnMaster.classList.remove('bg-emerald-600', 'hover:bg-emerald-700', 'shadow-emerald-600/30');
+                btnMaster.classList.add('bg-teal-500', 'hover:bg-teal-600', 'shadow-teal-500/30');
+                btnText.innerText = "Markeer als Geleerd";
+            }
+
+            updateProgress();
+        }
+
+        function flipCard() {
+            if (words.length === 0) return;
+            isFlipped = !isFlipped;
+            document.getElementById('flashcard-inner').classList.toggle('rotate-y-180', isFlipped);
+        }
+
+        function nextCard() {
+            if (words.length === 0) return;
+            currentIndex = (currentIndex + 1) % words.length;
+            renderCard();
+        }
+
+        function prevCard() {
+            if (words.length === 0) return;
+            currentIndex = (currentIndex - 1 + words.length) % words.length;
+            renderCard();
+        }
+
+        function toggleMastered() {
+            if (words.length === 0) return;
+            words[currentIndex].mastered = !words[currentIndex].mastered;
+            saveWords();
+            renderCard();
+        }
+
+        function shuffleCards() {
+            for (let i = words.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [words[i], words[j]] = [words[j], words[i]];
+            }
+            currentIndex = 0;
+            renderCard();
+        }
+
+        function resetProgress() {
+            words.forEach(w => w.mastered = false);
+            saveWords();
+            renderCard();
+        }
+
+        function updateProgress() {
+            const masteredCount = words.filter(w => w.mastered).length;
+            const percentage = words.length > 0 ? (masteredCount / words.length) * 100 : 0;
+            document.getElementById('progress-bar').style.width = `${percentage}%`;
+            document.getElementById('progress-text').innerText = `${masteredCount} / ${words.length}`;
+        }
+
+        // Quiz Mode Logic
+        let currentQuizCorrect = null;
+
+        function generateQuizQuestion() {
+            if (words.length < 2) {
+                document.getElementById('quiz-question-box').innerHTML = `
+                    <p class="text-center text-slate-500 py-8 font-bold">Er zijn niet genoeg woorden om de quiz te spelen!</p>
+                `;
+                return;
+            }
+
+            // Hide feedback & next button
+            document.getElementById('quiz-feedback').classList.add('hidden');
+            document.getElementById('btn-next-quiz').classList.add('hidden');
+
+            // Select random word
+            const targetWord = words[Math.floor(Math.random() * words.length)];
+            currentQuizCorrect = targetWord;
+
+            document.getElementById('quiz-term').innerText = targetWord.term;
+
+            // Prepare options (1 correct, rest distractors)
+            let options = [targetWord];
+            let otherWords = words.filter(w => w.id !== targetWord.id);
+            otherWords = otherWords.sort(() => 0.5 - Math.random());
+            
+            options.push(...otherWords.slice(0, Math.min(3, otherWords.length)));
+            options = options.sort(() => 0.5 - Math.random());
+
+            // Render options
+            const container = document.getElementById('quiz-options');
+            container.innerHTML = '';
+
+            options.forEach(opt => {
+                const btn = document.createElement('button');
+                btn.className = "w-full text-left p-4 rounded-2xl border-2 border-slate-100 bg-slate-50 hover:bg-slate-100 hover:border-teal-300 transition-all font-semibold text-slate-700 flex justify-between items-center";
+                btn.innerHTML = `<span>${opt.definition}</span> <i class="fa-regular fa-circle text-slate-300"></i>`;
+                btn.onclick = () => checkQuizAnswer(opt, btn);
+                container.appendChild(btn);
+            });
+        }
+
+        function checkQuizAnswer(selected, buttonElem) {
+            const allButtons = document.querySelectorAll('#quiz-options button');
+            allButtons.forEach(btn => btn.disabled = true);
+
+            quizTotal++;
+            const feedback = document.getElementById('quiz-feedback');
+            feedback.classList.remove('hidden');
+
+            if (selected.id === currentQuizCorrect.id) {
+                quizScore++;
+                buttonElem.className = "w-full text-left p-4 rounded-2xl border-2 border-emerald-500 bg-emerald-50 text-emerald-900 font-bold flex justify-between items-center";
+                buttonElem.querySelector('i').className = "fa-solid fa-circle-check text-emerald-600 text-lg";
+                
+                feedback.className = "p-4 rounded-2xl text-center font-bold bg-emerald-100 text-emerald-800";
+                feedback.innerHTML = "<i class='fa-solid fa-face-smile mr-2'></i> Uitstekend! Dat is de juiste definitie.";
+            } else {
+                buttonElem.className = "w-full text-left p-4 rounded-2xl border-2 border-rose-500 bg-rose-50 text-rose-900 font-bold flex justify-between items-center";
+                buttonElem.querySelector('i').className = "fa-solid fa-circle-xmark text-rose-600 text-lg";
+
+                feedback.className = "p-4 rounded-2xl text-center font-bold bg-rose-100 text-rose-800";
+                feedback.innerHTML = `<i class='fa-solid fa-face-frown mr-2'></i> Helaas! De juiste definitie was: <strong>"${currentQuizCorrect.definition}"</strong>`;
+            }
+
+            document.getElementById('quiz-score').innerText = `Score: ${quizScore} / ${quizTotal}`;
+            document.getElementById('btn-next-quiz').classList.remove('hidden');
+        }
+
+        // Keyboard Controls
+        document.addEventListener('keydown', (e) => {
+            const cardsTabVisible = !document.getElementById('sec-cards').classList.contains('hidden');
+            if (!cardsTabVisible) return;
+
+            if (e.key === 'ArrowRight') nextCard();
+            if (e.key === 'ArrowLeft') prevCard();
+            if (e.key === ' ' || e.key === 'ArrowUp' || e.key === 'ArrowDown') {
+                e.preventDefault();
+                flipCard();
+            }
+        });
+
+        // Initialize App
+        renderCard();
+    </script>
+</body>
+</html>
