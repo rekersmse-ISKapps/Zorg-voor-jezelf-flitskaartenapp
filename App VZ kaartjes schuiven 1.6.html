@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Zenuwstelsel in de Juiste Volgorde</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f4f7f6;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            user-select: none;
+        }
+        h1 {
+            color: #2c3e50;
+            margin-bottom: 5px;
+        }
+        p {
+            color: #7f8c8d;
+            font-size: 1.2rem;
+            margin-bottom: 30px;
+        }
+        /* Zones voor de juiste volgorde */
+        .slots-container {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 40px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        .slot {
+            width: 160px;
+            height: 160px;
+            border: 3px dashed #bdc3c7;
+            border-radius: 12px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            background-color: #fff;
+            position: relative;
+        }
+        .slot::before {
+            content: attr(data-number);
+            font-size: 2.5rem;
+            color: #ecf0f1;
+            font-weight: bold;
+            position: absolute;
+        }
+        /* De sleepbare kaartjes */
+        .cards-container {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            justify-content: center;
+            min-height: 180px;
+            padding: 20px;
+            background-color: #eaeaea;
+            border-radius: 15px;
+            width: 90%;
+            max-width: 1100px;
+        }
+        .card {
+            width: 140px;
+            height: 140px;
+            background-color: #ffffff;
+            border: 2px solid #34495e;
+            border-radius: 10px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 10px;
+            font-size: 1rem;
+            font-weight: 500;
+            line-height: 1.4;
+            cursor: grab;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            transition: transform 0.2s, box-shadow 0.2s;
+            z-index: 10;
+        }
+        .card:active {
+            cursor: grabbing;
+        }
+        .slot .card {
+            margin: 0;
+            position: absolute;
+            top: 8px;
+            left: 8px;
+        }
+        /* Succes melding */
+        #message {
+            margin-top: 20px;
+            font-size: 1.6rem;
+            font-weight: bold;
+            color: #27ae60;
+            height: 35px;
+        }
+        button {
+            margin-top: 20px;
+            padding: 12px 24px;
+            font-size: 1.1rem;
+            background-color: #2980b9;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        button:hover {
+            background-color: #3498db;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Van Prikkel tot Reactie</h1>
+    <p>Sleep de kaartjes in de juiste biologische volgorde (1 tot en met 6).</p>
+
+    <!-- De 6 genummerde vakken -->
+    <div class="slots-container">
+        <div class="slot" data-number="1" id="slot-1"></div>
+        <div class="slot" data-number="2" id="slot-2"></div>
+        <div class="slot" data-number="3" id="slot-3"></div>
+        <div class="slot" data-number="4" id="slot-4"></div>
+        <div class="slot" data-number="5" id="slot-5"></div>
+        <div class="slot" data-number="6" id="slot-6"></div>
+    </div>
+
+    <!-- De kaartenbak onderaan -->
+    <div class="cards-container" id="cards-container"></div>
+
+    <div id="message"></div>
+    <button onclick="resetGame()">Opnieuw husselen</button>
+
+    <script>
+        // De exacte teksten van jouw werkblad in de juiste volgorde
+        const cardData = [
+            { id: "1", text: "Het roepen van je naam is de prikkel." },
+            { id: "2", text: "Deze prikkel (bericht) gaat door de gehoorzenuw naar je hersenen." },
+            { id: "3", text: "Je hersenen reageren op het roepen van je naam." },
+            { id: "4", text: "Je hersenen sturen een bericht naar je spieren." },
+            { id: "5", text: "Je draait je om naar waar het geluid vandaan komt." },
+            { id: "6", text: "Je ziet de bal en vangt hem." }
+        ];
+
+        const container = document.getElementById('cards-container');
+        const messageDiv = document.getElementById('message');
+
+        function initGame() {
+            messageDiv.innerText = "";
+            container.innerHTML = "";
+            
+            // Maak de vakken leeg
+            document.querySelectorAll('.slot').forEach(slot => {
+                const child = slot.querySelector('.card');
+                if(child) child.remove();
+            });
+
+            // Volgorde willekeurig maken (husselen)
+            const shuffledData = [...cardData];
+            for (let i = shuffledData.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [shuffledData[i], shuffledData[j]] = [shuffledData[j], shuffledData[i]];
+            }
+
+            // Kaartjes genereren
+            shuffledData.forEach(data => {
+                const card = document.createElement('div');
+                card.className = 'card';
+                card.innerText = data.text;
+                card.id = `card-${data.id}`;
+                card.draggable = true;
+                
+                card.addEventListener('dragstart', dragStart);
+                container.appendChild(card);
+            });
+        }
+
+        // Muis sleep-logica
+        let draggedCard = null;
+
+        function dragStart(e) {
+            draggedCard = e.target;
+        }
+
+        document.querySelectorAll('.slot, #cards-container').forEach(zone => {
+            zone.addEventListener('dragover', (e) => e.preventDefault());
+            zone.addEventListener('drop', (e) => {
+                e.preventDefault();
+                if (zone.classList.contains('slot') && zone.children.length > 0) {
+                    return; 
+                }
+                zone.appendChild(draggedCard);
+                checkWin();
+            });
+        });
+
+        // Touchscreen ondersteuning (voor touch op het digibord)
+        document.addEventListener('touchstart', handleTouchStart, {passive: false});
+        document.addEventListener('touchmove', handleTouchMove, {passive: false});
+        document.addEventListener('touchend', handleTouchEnd);
+
+        let touchCard = null;
+
+        function handleTouchStart(e) {
+            if (e.target.classList.contains('card')) {
+                touchCard = e.target;
+                touchCard.style.position = 'absolute';
+                moveAt(e.touches[0]);
+            }
+        }
+
+        function moveAt(touch) {
+            if (!touchCard) return;
+            touchCard.style.left = touch.clientX - touchCard.offsetWidth / 2 + 'px';
+            touchCard.style.top = touch.clientY - touchCard.offsetHeight / 2 + 'px';
+        }
+
+        function handleTouchMove(e) {
+            if (!touchCard) return;
+            e.preventDefault(); 
+            moveAt(e.touches[0]);
+        }
+
+        function handleTouchEnd(e) {
+            if (!touchCard) return;
+            
+            touchCard.style.display = 'none';
+            let elemBelow = document.elementFromPoint(e.changedTouches[0].clientX, e.changedTouches[0].clientY);
+            touchCard.style.display = 'flex';
+
+            if (!elemBelow) {
+                resetTouchCard();
+                return;
+            }
+
+            let slot = elemBelow.closest('.slot');
+            let baseContainer = elemBelow.closest('#cards-container');
+
+            if (slot && slot.children.length === 0) {
+                slot.appendChild(touchCard);
+                touchCard.style.position = 'static';
+            } else if (baseContainer) {
+                baseContainer.appendChild(touchCard);
+                touchCard.style.position = 'static';
+            } else {
+                resetTouchCard();
+            }
+
+            touchCard = null;
+            checkWin();
+        }
+
+        function resetTouchCard() {
+            touchCard.style.position = 'static';
+        }
+
+        // Controleren of de kaartjes in de juiste volgorde liggen
+        function checkWin() {
+            let correct = 0;
+            cardData.forEach(data => {
+                const slot = document.getElementById(`slot-${data.id}`);
+                const cardInside = slot.querySelector('.card');
+                if (cardInside && cardInside.id === `card-${data.id}`) {
+                    correct++;
+                }
+            });
+
+            if (correct === 6) {
+                messageDiv.innerText = "🎉 Super! De biologische volgorde is helemaal correct!";
+            } else {
+                messageDiv.innerText = "";
+            }
+        }
+
+        function resetGame() {
+            initGame();
+        }
+
+        // Start het spel direct op
+        initGame();
+    </script>
+</body>
+</html>
